@@ -23,6 +23,27 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
+// 3. GET: Dapatkan data berdasarkan nama produk (Pencarian)
+app.get('/api/products/search', async (req, res) => {
+    try {
+        const { name } = req.query; 
+        
+        if (!name) {
+            return res.status(400).json({ message: "Parameter pencarian 'name' harus diisi" });
+        }
+
+        const result = await pool.query('SELECT * FROM products WHERE name ILIKE $1', [`%${name}%`]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Produk tidak ditemukan" });
+        }
+        
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 2. GET: Dapatkan data berdasarkan ID
 app.get('/api/products/:id', async (req, res) => {
     try {
@@ -35,7 +56,7 @@ app.get('/api/products/:id', async (req, res) => {
     }
 });
 
-// 3. POST: Membuat data baru
+// 4. POST: Membuat data baru
 app.post('/api/products', async (req, res) => {
     try {
         const { shop_id, category_id, name, description, price, stock } = req.body;
@@ -49,7 +70,7 @@ app.post('/api/products', async (req, res) => {
     }
 });
 
-// 4. PUT: Memperbarui data
+// 5. PUT: Memperbarui data
 app.put('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -65,7 +86,7 @@ app.put('/api/products/:id', async (req, res) => {
     }
 });
 
-// 5. DELETE: Menghapus data
+// 6. DELETE: Menghapus data
 app.delete('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
